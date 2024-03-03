@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "52688105199",
+    "project_id": "spend-sneak",
+    "storage_bucket": "spend-sneak.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52688105199:android:4b1101495504e990f3b51a",
+        "android_client_info": {
+          "package_name": "com.example.expeness"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmKBYNKF_QUJOab7zvjM8oFaIKWmy1i9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
