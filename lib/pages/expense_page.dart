@@ -36,285 +36,293 @@ class _ExpensePageState extends State<ExpensePage> {
       expense['icon'] = randomIcon;
     }
 
-
     return Scaffold(
       appBar: AppBar(
         title: Text((expense['title'] ?? '').toString()),
       ),
       // editable name, amount, period
-      body: SingleChildScrollView(
-        clipBehavior: Clip.none,
-        child: Column(
-          children: [
-            // textboxes
-            Padding(
-              padding: const EdgeInsets.all(8),
-              // icon and title textboxes in a row, both modifiable
-              child: Row(
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 100,
+            child: SingleChildScrollView(
+              clipBehavior: Clip.none,
+              child: Column(
                 children: [
-                  // icon
-                  Container(
-                    height: 60,
-                    width: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: IconButton(
-                      icon: Text((expense['icon'] ?? randomIcon).toString(),
-                          style: const TextStyle(fontSize: 27)),
-                      onPressed: () async {
-                        // showModalBottomSheet to show the emoji picker
-                        await showModalBottomSheet(
-                          context: context,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.background,
-                          builder: (context) {
-                            return Container(
-                              color: Theme.of(context).colorScheme.background,
-                              child: SafeArea(
-                                child: EmojiPicker(
-                                  config: Config(
-                                    height: 700,
-                                    bottomActionBarConfig: BottomActionBarConfig(
-                                      // the color of unselected button on this page
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .background,
-                                      // the color of selected button on this page
-                                      buttonColor: Theme.of(context)
-                                          .colorScheme
-                                          .background,
-                                      // the color of the icon of the selected button on this page
-                                      showBackspaceButton: true,
-                                      buttonIconColor:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    emojiViewConfig: EmojiViewConfig(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .background,
-                                      buttonMode: ButtonMode.CUPERTINO,
-                                    ),
-                                    categoryViewConfig: CategoryViewConfig(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .background,
-                                      iconColorSelected:
-                                          Theme.of(context).colorScheme.primary,
-                                      indicatorColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      tabBarHeight: 50,
-                                    ),
-                                  ),
-                                  onEmojiSelected: (category, emoji) {
-                                    Navigator.of(context).pop(emoji.emoji);
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ).then((value) => {
-                              if (value != null)
-                                {
-                                  setState(() {
-                                    expense['icon'] = value;
-                                  })
-                                }
-                            });
-                      },
+                  // textboxes
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    // icon and title textboxes in a row, both modifiable
+                    child: Row(
+                      children: [
+                        // icon
+                        Container(
+                          height: 60,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: IconButton(
+                            icon: Text(
+                                (expense['icon'] ?? randomIcon).toString(),
+                                style: const TextStyle(fontSize: 27)),
+                            onPressed: () async {
+                              // showModalBottomSheet to show the emoji picker
+                              await showModalBottomSheet(
+                                context: context,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.background,
+                                // isScrollControlled: true,
+                                builder: (context) {
+                                  return DraggableScrollableSheet(
+                                    expand: false, // Set this to true if you want the sheet to be expandable
+                                    initialChildSize: 0.9, // Set the initial height of the sheet
+                                    maxChildSize: 0.9, // Set the maximum height of the sheet
+                                    builder: (context, scrollController) {
+                                      return Container(
+                                        color: Theme.of(context).colorScheme.background,
+                                        child: SafeArea(
+                                          child: EmojiPicker(
+                                            config: Config(
+                                              height: 200,
+                                              bottomActionBarConfig: BottomActionBarConfig(
+                                                backgroundColor: Theme.of(context).colorScheme.background,
+                                                buttonColor: Theme.of(context).colorScheme.background,
+                                                showBackspaceButton: true,
+                                                buttonIconColor: Theme.of(context).colorScheme.primary,
+                                              ),
+                                              emojiViewConfig: EmojiViewConfig(
+                                                backgroundColor: Theme.of(context).colorScheme.background,
+                                                buttonMode: ButtonMode.CUPERTINO,
+                                              ),
+                                              categoryViewConfig: CategoryViewConfig(
+                                                backgroundColor: Theme.of(context).colorScheme.background,
+                                                iconColorSelected: Theme.of(context).colorScheme.primary,
+                                                indicatorColor: Theme.of(context).colorScheme.primary,
+                                                tabBarHeight: 50,
+                                              ),
+                                            ),
+                                            onEmojiSelected: (category, emoji) {
+                                              Navigator.of(context).pop(emoji.emoji);
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ).then((value) => {
+                                    if (value != null)
+                                      {
+                                        setState(() {
+                                          expense['icon'] = value;
+                                        })
+                                      }
+                                  });
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        // title
+                        Expanded(
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Title',
+                            ),
+                            controller: _titleController
+                              ..text = (expense['title'] ?? '').toString(),
+                            onChanged: (value) {
+                              setState(() {
+                                expense['title'] = value;
+                                // put cursor at the end
+                                _titleController.selection =
+                                    TextSelection.fromPosition(TextPosition(
+                                        offset: _titleController.text.length));
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 8),
-                  // title
-                  Expanded(
+                  // amount
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    // only number keyboard is allowed ,and only numbers are allowed, if non-numeric value is entered, it is ignored
                     child: TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Title',
-                      ),
-                      controller: _titleController
-                        ..text = (expense['title'] ?? '').toString(),
-                      onChanged: (value) {
-                        setState(() {
-                          expense['title'] = value;
-                          // put cursor at the end
-                          _titleController.selection = TextSelection.fromPosition(
-                              TextPosition(offset: _titleController.text.length));
-                        });
-                      },
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                        ),
+                        controller: _amountController
+                          ..text = (expense['amount'] ?? '').toString(),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        onChanged: (value) {
+                          var isDouble = double.tryParse(value);
+                          var parsable = isDouble != null;
+                          if (_amountController.text.isNotEmpty && parsable) {
+                            expense['amount'] = double.parse(value);
+                          } else {
+                            expense['amount'] = 0;
+                            _amountController.text = '';
+                          }
+                        }),
+                  ),
+                  // choose billing period, it is 2x2 grid of buttons, daily, weekly, monthly, yearly. when pressed, it sets the period in the expense object, and updates the UI. it also becomes the selected button
+                  SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        // daily
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                expense['period'] = 1;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: expense['period'] == 1
+                                  ? Theme.of(context).colorScheme.primary
+                                  : null,
+                              foregroundColor: expense['period'] == 1
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : null,
+                            ),
+                            child: const Text('Daily'),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        // weekly
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                expense['period'] = 7;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: expense['period'] == 7
+                                  ? Theme.of(context).colorScheme.primary
+                                  : null,
+                              foregroundColor: expense['period'] == 7
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : null,
+                            ),
+                            child: const Text('Weekly'),
+                          ),
+                        ),
+                        // monthly
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            // amount
-            Padding(
-              padding: const EdgeInsets.all(8),
-              // only number keyboard is allowed ,and only numbers are allowed, if non-numeric value is entered, it is ignored
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                ),
-                controller: _amountController
-                  ..text = (expense['amount'] ?? '').toString(),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (value) {
-                  var isDouble = double.tryParse(value);
-                  var parsable = isDouble != null;
-                  if (_amountController.text.isNotEmpty && parsable) {
-                    expense['amount'] = double.parse(value);
-                  } else {
-                    expense['amount'] = 0;
-                    _amountController.text = '';
-                  }
-                }
-              ),
-            ),
-            // choose billing period, it is 2x2 grid of buttons, daily, weekly, monthly, yearly. when pressed, it sets the period in the expense object, and updates the UI. it also becomes the selected button
-            SizedBox(height: 18),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  // daily
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          expense['period'] = 1;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: expense['period'] == 1
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                        foregroundColor: expense['period'] == 1
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : null,
-                      ),
-                      child: const Text('Daily'),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        // monthly
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                expense['period'] = 365 / 12;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: expense['period'] == 365 / 12
+                                  ? Theme.of(context).colorScheme.primary
+                                  : null,
+                              foregroundColor: expense['period'] == 365 / 12
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : null,
+                            ),
+                            child: const Text('Monthly'),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        // yearly
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                expense['period'] = 365;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: expense['period'] == 365
+                                  ? Theme.of(context).colorScheme.primary
+                                  : null,
+                              foregroundColor: expense['period'] == 365
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : null,
+                            ),
+                            child: const Text('Yearly'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 8),
-                  // weekly
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          expense['period'] = 7;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: expense['period'] == 7
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                        foregroundColor: expense['period'] == 7
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : null,
-                      ),
-                      child: const Text('Weekly'),
-                    ),
-                  ),
-                  // monthly
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  // monthly
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          expense['period'] = 365 / 12;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: expense['period'] == 365 / 12
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                        foregroundColor: expense['period'] == 365 / 12
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : null,
-                      ),
-                      child: const Text('Monthly'),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  // yearly
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          expense['period'] = 365;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: expense['period'] == 365
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                        foregroundColor: expense['period'] == 365
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : null,
-                      ),
-                      child: const Text('Yearly'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
-            // Add Tax
-            SizedBox(height: 18),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
                   // Add Tax
-                  Checkbox(
-                    value: expense['tax'] ?? false,
-                    onChanged: (value) {
-                      setState(() {
-                        expense['tax'] = value;
-                      });
-                    }
-                  ),
-                  SizedBox(width: 8),
-                  // Tax amount
-                  Expanded(
-                    child: TextField(
-                      enabled: expense['tax'] ?? false,
-                      decoration: const InputDecoration(
-                        labelText: 'Tax Percentage',
-                      ),
-                      controller: _taxController
-                        ..text = (expense['taxAmount'] ?? '').toString(),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) {
-                        var isDouble = double.tryParse(value);
-                        var parsable = isDouble != null;
-                        if (_taxController.text.isNotEmpty && parsable) {
-                          expense['taxAmount'] = double.parse(value);
-                        } else {
-                          expense['taxAmount'] = 0;
-                          _taxController.text = '';
-                        }
-                      }
+                  SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Add Tax
+                        Checkbox(
+                            value: expense['tax'] ?? false,
+                            onChanged: (value) {
+                              setState(() {
+                                expense['tax'] = value;
+                              });
+                            }),
+                        SizedBox(width: 8),
+                        // Tax amount
+                        Expanded(
+                          child: TextField(
+                              enabled: expense['tax'] ?? false,
+                              decoration: const InputDecoration(
+                                labelText: 'Tax Percentage',
+                              ),
+                              controller: _taxController
+                                ..text =
+                                    (expense['taxAmount'] ?? '').toString(),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              onChanged: (value) {
+                                var isDouble = double.tryParse(value);
+                                var parsable = isDouble != null;
+                                if (_taxController.text.isNotEmpty &&
+                                    parsable) {
+                                  expense['taxAmount'] = double.parse(value);
+                                } else {
+                                  expense['taxAmount'] = 0;
+                                  _taxController.text = '';
+                                }
+                              }),
+                        ),
+                      ],
                     ),
                   ),
-
                 ],
               ),
             ),
+          ),
 
-            // Expanded(child: Container()),
-            // save button
-            SizedBox(
+          // save button
+          Positioned(
+            bottom: 0,
+            width: MediaQuery.of(context).size.width,
+            height: 100,
+            child: SizedBox(
               width: double.infinity,
               height: 100,
               child: ElevatedButton(
@@ -357,8 +365,10 @@ class _ExpensePageState extends State<ExpensePage> {
                       expense['amount'] == 0 ||
                       expense['period'] == null ||
                       expense['period'] == 0 ||
-                      (expense['tax'] != null && expense['tax'] && (expense['taxAmount'] == null || expense['taxAmount'] == 0))
-                  ) {
+                      (expense['tax'] != null &&
+                          expense['tax'] &&
+                          (expense['taxAmount'] == null ||
+                              expense['taxAmount'] == 0))) {
                     // please fill in all fields snack bar
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -389,8 +399,8 @@ class _ExpensePageState extends State<ExpensePage> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
