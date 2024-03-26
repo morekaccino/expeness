@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Color ColorSchemeSeed = const Color.fromRGBO(0, 126, 22, 255);
+  final ColorSchemeSeed = const Color.fromRGBO(0, 00, 255, 255);
 
   Future<void> _signInAnonymously() async {
     try {
