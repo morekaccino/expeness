@@ -20,6 +20,14 @@ class _ExpensePageState extends State<ExpensePage> {
   final _taxController = TextEditingController();
   late final randomIcon = randomIconGenerator();
 
+  // Deep copy of the expense object
+  late Map<String, dynamic> expenseDeepCopy;
+
+  Map<String, dynamic> deepCopy(Map<String, dynamic> original) {
+    var copy = Map<String, dynamic>.from(original);
+    return copy;
+  }
+
   String randomIconGenerator() {
     var random = Random();
     var emojiCodePoint = 0x1F300 + random.nextInt(0x1F3F0 - 0x1F300);
@@ -28,8 +36,16 @@ class _ExpensePageState extends State<ExpensePage> {
 
   @override
   Widget build(BuildContext context) {
-    final expense =
+    if (ModalRoute.of(context)?.settings.arguments == null) {
+      // return to the home page;
+      Navigator.of(context).pop();
+      dispose();
+    }
+    var expense =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    // if expenseDeepCopy not initialized, initialize it
+    expenseDeepCopy = deepCopy(expense);
 
     // if expense has no icon, set it to a random icon
     if (expense['icon'] == null || expense['icon'] == "") {
@@ -38,8 +54,20 @@ class _ExpensePageState extends State<ExpensePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text((expense['title'] ?? '').toString()),
-      ),
+          // title is "Edit Expense" if expense has an id, otherwise it is "Add Expense"
+          title: Text(expense['id'] == null ? 'Add Expense' : 'Edit Expense'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              _titleController.text = expenseDeepCopy['title'];
+              _amountController.text = expenseDeepCopy['amount'].toString();
+              _taxController.text = expenseDeepCopy['taxAmount'].toString();
+              setState(() {
+
+              });
+              Navigator.of(context).pop();
+            },
+          )),
       // editable name, amount, period
       body: Stack(
         children: [
@@ -78,35 +106,64 @@ class _ExpensePageState extends State<ExpensePage> {
                                 // isScrollControlled: true,
                                 builder: (context) {
                                   return DraggableScrollableSheet(
-                                    expand: false, // Set this to true if you want the sheet to be expandable
-                                    initialChildSize: 0.9, // Set the initial height of the sheet
-                                    maxChildSize: 0.9, // Set the maximum height of the sheet
+                                    expand: false,
+                                    // Set this to true if you want the sheet to be expandable
+                                    initialChildSize: 0.9,
+                                    // Set the initial height of the sheet
+                                    maxChildSize: 0.9,
+                                    // Set the maximum height of the sheet
                                     builder: (context, scrollController) {
                                       return Container(
-                                        color: Theme.of(context).colorScheme.background,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .background,
                                         child: SafeArea(
                                           child: EmojiPicker(
                                             config: Config(
                                               height: 200,
-                                              bottomActionBarConfig: BottomActionBarConfig(
-                                                backgroundColor: Theme.of(context).colorScheme.background,
-                                                buttonColor: Theme.of(context).colorScheme.background,
+                                              bottomActionBarConfig:
+                                                  BottomActionBarConfig(
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .background,
+                                                buttonColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .background,
                                                 showBackspaceButton: true,
-                                                buttonIconColor: Theme.of(context).colorScheme.primary,
+                                                buttonIconColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
                                               ),
                                               emojiViewConfig: EmojiViewConfig(
-                                                backgroundColor: Theme.of(context).colorScheme.background,
-                                                buttonMode: ButtonMode.CUPERTINO,
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .background,
+                                                buttonMode:
+                                                    ButtonMode.CUPERTINO,
                                               ),
-                                              categoryViewConfig: CategoryViewConfig(
-                                                backgroundColor: Theme.of(context).colorScheme.background,
-                                                iconColorSelected: Theme.of(context).colorScheme.primary,
-                                                indicatorColor: Theme.of(context).colorScheme.primary,
+                                              categoryViewConfig:
+                                                  CategoryViewConfig(
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .background,
+                                                iconColorSelected:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                indicatorColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
                                                 tabBarHeight: 50,
                                               ),
                                             ),
                                             onEmojiSelected: (category, emoji) {
-                                              Navigator.of(context).pop(emoji.emoji);
+                                              Navigator.of(context)
+                                                  .pop(emoji.emoji);
                                             },
                                           ),
                                         ),
@@ -135,13 +192,7 @@ class _ExpensePageState extends State<ExpensePage> {
                             controller: _titleController
                               ..text = (expense['title'] ?? '').toString(),
                             onChanged: (value) {
-                              setState(() {
-                                expense['title'] = value;
-                                // put cursor at the end
-                                _titleController.selection =
-                                    TextSelection.fromPosition(TextPosition(
-                                        offset: _titleController.text.length));
-                              });
+                              expense['title'] = value;
                             },
                           ),
                         ),
