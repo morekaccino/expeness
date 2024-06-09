@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expeness/logic/expenses.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _editMode = false;
   double _total = 0.0;
+  late Expenses expenses;
 
   double _calculateTotalPerDay(List<Map<String, dynamic>> expenses) {
     double total = 0.0;
@@ -49,7 +50,10 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(
                       context, '/expense', arguments: <String, dynamic>{})
                   .then((value) => {
-                        if (value != null) {setState(() {})}
+                        if (value != null) {setState(() {
+                          expenses.addExpense(value as Map<String, dynamic>);
+                          _total = expenses.totalDaily;
+                        })}
                       });
               setState(() {
                 _editMode = false;
@@ -107,9 +111,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                         );
                       }
-                      _calculateTotalPerDay(snapshot.data!.docs
-                          .map((e) => e.data() as Map<String, dynamic>)
-                          .toList());
+                      expenses = Expenses(snapshot);
+                      _total = expenses.totalDaily;
                       return ListView.builder(
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -126,9 +129,12 @@ class _HomePageState extends State<HomePage> {
                                   .collection('users')
                                   .doc(user.uid)
                                   .collection('expenses')
-                                  .doc(expenseDict?['id'])
+                                  .doc(expenseDict['id'])
                                   .delete()
                                   .then((value) => {
+                                        expenses
+                                            .removeExpense(expenseDict['id']),
+                                        _total = expenses.totalDaily,
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
@@ -204,10 +210,10 @@ class _HomePageState extends State<HomePage> {
                                     .then((value) => {
                                           if (value != null)
                                             {
-                                              setState(() {
-                                                expenseDict = value
-                                                    as Map<String, dynamic>?;
-                                              })
+                                              expenses.updateExpense(value
+                                                  as Map<String, dynamic>),
+                                              _total = expenses.totalDaily,
+                                              setState(() {})
                                             }
                                         });
                               },
@@ -237,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                 // open ExpensePage and pass the expense
               },
               child: Text(
-                'Total: \$${_total.toStringAsFixed(2)}',
+                _total.toStringAsFixed(2),
                 style: const TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,

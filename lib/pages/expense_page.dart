@@ -5,6 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
+
+// TODO: implement delete expense
+// TODO: add bi-weekly
+
 class ExpensePage extends StatefulWidget {
   const ExpensePage({super.key});
 
@@ -59,9 +63,13 @@ class _ExpensePageState extends State<ExpensePage> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              _titleController.text = expenseDeepCopy['title'];
+              _titleController.text = expenseDeepCopy['title'] ?? '';
               _amountController.text = expenseDeepCopy['amount'].toString();
               _taxController.text = expenseDeepCopy['taxAmount'].toString();
+              expense['icon'] = expenseDeepCopy['icon'];
+              expense['period'] = expenseDeepCopy['period'];
+              expense['tax'] = expenseDeepCopy['tax'];
+              expense['taxAmount'] = expenseDeepCopy['taxAmount'];
               setState(() {
 
               });
