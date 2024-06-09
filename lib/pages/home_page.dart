@@ -244,7 +244,110 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onPressed: () {
-                // open ExpensePage and pass the expense
+                // open bottom sheet
+                showModalBottomSheet(
+                  context: context,
+                  enableDrag: true,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return Container(
+                      width: double.infinity,
+                      // enough height to show the content
+                      height: 700,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Total Daily',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _total.toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Total Weekly',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            (expenses.totalWeekly).toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Total Bi-Weekly',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            (expenses.totalBiWeekly).toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Total Monthly',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            (expenses.totalMonthly).toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Total Yearly',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            (expenses.totalYearly).toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                        ],
+                      ),
+                    );
+                  },
+                );
               },
               child: Text(
                 _total.toStringAsFixed(2),
