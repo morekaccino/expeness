@@ -50,10 +50,14 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(
                       context, '/expense', arguments: <String, dynamic>{})
                   .then((value) => {
-                        if (value != null) {setState(() {
-                          expenses.addExpense(value as Map<String, dynamic>);
-                          _total = expenses.totalDaily;
-                        })}
+                        if (value != null)
+                          {
+                            setState(() {
+                              expenses
+                                  .addExpense(value as Map<String, dynamic>);
+                              _total = expenses.totalDaily;
+                            })
+                          }
                       });
               setState(() {
                 _editMode = false;

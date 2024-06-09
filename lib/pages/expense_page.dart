@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
-
 // TODO: implement delete expense
 // TODO: add bi-weekly
 
@@ -24,11 +23,20 @@ class _ExpensePageState extends State<ExpensePage> {
   final _taxController = TextEditingController();
   late final randomIcon = randomIconGenerator();
 
+  Map<String, dynamic>? expense;
+
   // Deep copy of the expense object
-  late Map<String, dynamic> expenseDeepCopy;
+  Map<String, dynamic>? expenseDeepCopy;
 
   Map<String, dynamic> deepCopy(Map<String, dynamic> original) {
-    var copy = Map<String, dynamic>.from(original);
+    var copy = <String, dynamic>{};
+    original.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        copy[key] = deepCopy(value);
+      } else {
+        copy[key] = value;
+      }
+    });
     return copy;
   }
 
@@ -45,35 +53,27 @@ class _ExpensePageState extends State<ExpensePage> {
       Navigator.of(context).pop();
       dispose();
     }
-    var expense =
+    expense ??=
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
 
     // if expenseDeepCopy not initialized, initialize it
-    expenseDeepCopy = deepCopy(expense);
+    expenseDeepCopy ??= deepCopy(expense!);
 
     // if expense has no icon, set it to a random icon
-    if (expense['icon'] == null || expense['icon'] == "") {
-      expense['icon'] = randomIcon;
+    if (expense!['icon'] == null || expense!['icon'] == "") {
+      expense!['icon'] = randomIcon;
     }
 
     return Scaffold(
       appBar: AppBar(
           // title is "Edit Expense" if expense has an id, otherwise it is "Add Expense"
-          title: Text(expense['id'] == null ? 'Add Expense' : 'Edit Expense'),
+          title: Text(expense!['id'] == null ? 'Add Expense' : 'Edit Expense'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              _titleController.text = expenseDeepCopy['title'] ?? '';
-              _amountController.text = expenseDeepCopy['amount'].toString();
-              _taxController.text = expenseDeepCopy['taxAmount'].toString();
-              expense['icon'] = expenseDeepCopy['icon'];
-              expense['period'] = expenseDeepCopy['period'];
-              expense['tax'] = expenseDeepCopy['tax'];
-              expense['taxAmount'] = expenseDeepCopy['taxAmount'];
-              setState(() {
-
-              });
-              Navigator.of(context).pop();
+              expense = deepCopy(expenseDeepCopy!);
+              setState(() {});
+              Navigator.of(context).pop(expense);
             },
           )),
       // editable name, amount, period
@@ -103,7 +103,7 @@ class _ExpensePageState extends State<ExpensePage> {
                           ),
                           child: IconButton(
                             icon: Text(
-                                (expense['icon'] ?? randomIcon).toString(),
+                                (expense!['icon'] ?? randomIcon).toString(),
                                 style: const TextStyle(fontSize: 27)),
                             onPressed: () async {
                               // showModalBottomSheet to show the emoji picker
@@ -183,7 +183,7 @@ class _ExpensePageState extends State<ExpensePage> {
                                     if (value != null)
                                       {
                                         setState(() {
-                                          expense['icon'] = value;
+                                          expense!['icon'] = value;
                                         })
                                       }
                                   });
@@ -198,9 +198,9 @@ class _ExpensePageState extends State<ExpensePage> {
                               labelText: 'Title',
                             ),
                             controller: _titleController
-                              ..text = (expense['title'] ?? '').toString(),
+                              ..text = (expense!['title'] ?? '').toString(),
                             onChanged: (value) {
-                              expense['title'] = value;
+                              expense!['title'] = value;
                             },
                           ),
                         ),
@@ -216,16 +216,16 @@ class _ExpensePageState extends State<ExpensePage> {
                           labelText: 'Amount',
                         ),
                         controller: _amountController
-                          ..text = (expense['amount'] ?? '').toString(),
+                          ..text = (expense!['amount'] ?? '').toString(),
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         onChanged: (value) {
                           var isDouble = double.tryParse(value);
                           var parsable = isDouble != null;
                           if (_amountController.text.isNotEmpty && parsable) {
-                            expense['amount'] = double.parse(value);
+                            expense!['amount'] = double.parse(value);
                           } else {
-                            expense['amount'] = 0;
+                            expense!['amount'] = 0;
                             _amountController.text = '';
                           }
                         }),
@@ -241,14 +241,14 @@ class _ExpensePageState extends State<ExpensePage> {
                           child: ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                expense['period'] = 1;
+                                expense!['period'] = 1;
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: expense['period'] == 1
+                              primary: expense!['period'] == 1
                                   ? Theme.of(context).colorScheme.primary
                                   : null,
-                              foregroundColor: expense['period'] == 1
+                              foregroundColor: expense!['period'] == 1
                                   ? Theme.of(context).colorScheme.onPrimary
                                   : null,
                             ),
@@ -261,14 +261,14 @@ class _ExpensePageState extends State<ExpensePage> {
                           child: ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                expense['period'] = 7;
+                                expense!['period'] = 7;
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: expense['period'] == 7
+                              primary: expense!['period'] == 7
                                   ? Theme.of(context).colorScheme.primary
                                   : null,
-                              foregroundColor: expense['period'] == 7
+                              foregroundColor: expense!['period'] == 7
                                   ? Theme.of(context).colorScheme.onPrimary
                                   : null,
                             ),
@@ -288,14 +288,14 @@ class _ExpensePageState extends State<ExpensePage> {
                           child: ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                expense['period'] = 365 / 12;
+                                expense!['period'] = 365 / 12;
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: expense['period'] == 365 / 12
+                              primary: expense!['period'] == 365 / 12
                                   ? Theme.of(context).colorScheme.primary
                                   : null,
-                              foregroundColor: expense['period'] == 365 / 12
+                              foregroundColor: expense!['period'] == 365 / 12
                                   ? Theme.of(context).colorScheme.onPrimary
                                   : null,
                             ),
@@ -308,14 +308,14 @@ class _ExpensePageState extends State<ExpensePage> {
                           child: ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                expense['period'] = 365;
+                                expense!['period'] = 365;
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: expense['period'] == 365
+                              primary: expense!['period'] == 365
                                   ? Theme.of(context).colorScheme.primary
                                   : null,
-                              foregroundColor: expense['period'] == 365
+                              foregroundColor: expense!['period'] == 365
                                   ? Theme.of(context).colorScheme.onPrimary
                                   : null,
                             ),
@@ -336,23 +336,23 @@ class _ExpensePageState extends State<ExpensePage> {
                       children: [
                         // Add Tax
                         Checkbox(
-                            value: expense['tax'] ?? false,
+                            value: expense!['tax'] ?? false,
                             onChanged: (value) {
                               setState(() {
-                                expense['tax'] = value;
+                                expense!['tax'] = value;
                               });
                             }),
                         SizedBox(width: 8),
                         // Tax amount
                         Expanded(
                           child: TextField(
-                              enabled: expense['tax'] ?? false,
+                              enabled: expense!['tax'] ?? false,
                               decoration: const InputDecoration(
                                 labelText: 'Tax Percentage',
                               ),
                               controller: _taxController
                                 ..text =
-                                    (expense['taxAmount'] ?? '').toString(),
+                                    (expense!['taxAmount'] ?? '').toString(),
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                       decimal: true),
@@ -361,9 +361,9 @@ class _ExpensePageState extends State<ExpensePage> {
                                 var parsable = isDouble != null;
                                 if (_taxController.text.isNotEmpty &&
                                     parsable) {
-                                  expense['taxAmount'] = double.parse(value);
+                                  expense!['taxAmount'] = double.parse(value);
                                 } else {
-                                  expense['taxAmount'] = 0;
+                                  expense!['taxAmount'] = 0;
                                   _taxController.text = '';
                                 }
                               }),
@@ -397,7 +397,7 @@ class _ExpensePageState extends State<ExpensePage> {
                   var isDouble = double.tryParse(_amountController.text);
                   var parsable = isDouble != null;
                   if (_amountController.text.isNotEmpty && parsable) {
-                    expense['amount'] = double.parse(_amountController.text);
+                    expense!['amount'] = double.parse(_amountController.text);
                   } else {
                     // invalid amount snack bar
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -416,18 +416,18 @@ class _ExpensePageState extends State<ExpensePage> {
                   }
 
                   // if anything changed, save the expense object to the database
-                  if (expense['icon'] == null ||
-                      expense['icon'] == "" ||
-                      expense['title'] == null ||
-                      expense['title'] == "" ||
-                      expense['amount'] == null ||
-                      expense['amount'] == 0 ||
-                      expense['period'] == null ||
-                      expense['period'] == 0 ||
-                      (expense['tax'] != null &&
-                          expense['tax'] &&
-                          (expense['taxAmount'] == null ||
-                              expense['taxAmount'] == 0))) {
+                  if (expense!['icon'] == null ||
+                      expense!['icon'] == "" ||
+                      expense!['title'] == null ||
+                      expense!['title'] == "" ||
+                      expense!['amount'] == null ||
+                      expense!['amount'] == 0 ||
+                      expense!['period'] == null ||
+                      expense!['period'] == 0 ||
+                      (expense!['tax'] != null &&
+                          expense!['tax'] &&
+                          (expense!['taxAmount'] == null ||
+                              expense!['taxAmount'] == 0))) {
                     // please fill in all fields snack bar
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -448,8 +448,8 @@ class _ExpensePageState extends State<ExpensePage> {
                       .collection('users')
                       .doc(userID)
                       .collection('expenses')
-                      .doc(expense['id'])
-                      .set(expense);
+                      .doc(expense!['id'])
+                      .set(expense!);
                   Navigator.of(context).pop(expense);
                 },
                 child: const Text(
