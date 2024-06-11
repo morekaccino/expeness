@@ -95,8 +95,11 @@ class _ExpensePageState extends State<ExpensePage> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: IconButton(
-                      icon: Text((expense!['icon'] ?? randomIcon).toString(),
-                          style: const TextStyle(fontSize: 130)),
+                      icon: Hero(
+                        tag: "${expense!['id']}-icon",
+                        child: Text((expense!['icon'] ?? randomIcon).toString(),
+                            style: const TextStyle(fontSize: 130)),
+                      ),
                       onPressed: () async {
                         // showModalBottomSheet to show the emoji picker
                         await showModalBottomSheet(

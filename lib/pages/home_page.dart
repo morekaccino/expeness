@@ -178,13 +178,16 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             child: ListTile(
-                              visualDensity: VisualDensity(vertical: 3),
+                              visualDensity: VisualDensity(vertical: 1),
                               // to expand
                               leading: CircleAvatar(
                                 backgroundColor: Colors.transparent,
-                                child: Text(
-                                  (expenseDict['icon'] ?? ' ').toString(),
-                                  style: const TextStyle(fontSize: 28),
+                                child: Hero(
+                                  tag: "${expenseDict['id']}-icon",
+                                  child: Text(
+                                    (expenseDict['icon'] ?? ' ').toString(),
+                                    style: const TextStyle(fontSize: 28),
+                                  ),
                                 ),
                               ),
                               title: expenseDict['title'] != null &&
@@ -230,69 +233,72 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            height: 100,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
+          Hero(
+            tag: 'total-${expenses!.defaultTotalPeriod}',
+            child: SizedBox(
+              width: double.infinity,
+              height: 100,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
-              ),
-              onPressed: () {
-                // open bottom sheet, and read the value returned
-                showModalBottomSheet(
-                  context: context,
-                  enableDrag: true,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return TotalCostPage(expenses: expenses!);
-                  },
-                ).then((value) {
-                  if (value != null) {
-                    value = value as Expenses;
-                    expenses!.defaultPeriodText = value.defaultPeriodText;
-                    expenses!.defaultTotalPeriod = value.defaultTotalPeriod;
-                    _total = expenses!.defaultTotal;
-                    setState(() {});
-                  }
-                });
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    '\$',
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w200,
+                onPressed: () {
+                  // open bottom sheet, and read the value returned
+                  showModalBottomSheet(
+                    context: context,
+                    enableDrag: true,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return TotalCostPage(expenses: expenses!);
+                    },
+                  ).then((value) {
+                    if (value != null) {
+                      value = value as Expenses;
+                      expenses!.defaultPeriodText = value.defaultPeriodText;
+                      expenses!.defaultTotalPeriod = value.defaultTotalPeriod;
+                      _total = expenses!.defaultTotal;
+                      setState(() {});
+                    }
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      '\$',
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w200,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    Helper.toCurrencyFormat(_total),
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
+                    SizedBox(width: 8),
+                    Text(
+                      Helper.toCurrencyFormat(_total),
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    ' / ${expenses!.defaultPeriodText}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w200,
+                    Text(
+                      ' / ${expenses!.defaultPeriodText}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w200,
+                      ),
                     ),
-                  ),
-                  Expanded(child: Container()),
-                  Transform.rotate(
-                    angle: -90 * 3.14159 / 180,
-                    child: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 24,
+                    Expanded(child: Container()),
+                    Transform.rotate(
+                      angle: -90 * 3.14159 / 180,
+                      child: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 24,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
