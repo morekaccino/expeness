@@ -55,12 +55,20 @@ class Expenses {
 
   double get totalDaily {
     double total = 0.0;
+    if (expenses.isEmpty) {
+      return total;
+    }
     for (var expense in expenses) {
-      var temp = expense['amount'] / expense['period'];
-      if (expense['tax'] != null && expense['tax']) {
-        temp *= expense['taxAmount'] / 100 + 1;
+      try {
+        var temp = expense['amount'] / expense['period'];
+        if (expense['tax'] != null && expense['tax']) {
+          temp *= expense['taxAmount'] / 100 + 1;
+        }
+        total += temp;
       }
-      total += temp;
+      catch (e) {
+        print('Error: $e');
+      }
     }
     return total;
   }

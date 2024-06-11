@@ -232,97 +232,134 @@ class _ExpensePageState extends State<ExpensePage> {
                   ),
                   // choose billing period, it is 2x2 grid of buttons, daily, weekly, monthly, yearly. when pressed, it sets the period in the expense object, and updates the UI. it also becomes the selected button
                   SizedBox(height: 18),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(8),
+                  //   child: Row(
+                  //     children: [
+                  //       // daily
+                  //       Expanded(
+                  //         child: ElevatedButton(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               expense!['period'] = 1;
+                  //             });
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             primary: expense!['period'] == 1
+                  //                 ? Theme.of(context).colorScheme.primary
+                  //                 : null,
+                  //             foregroundColor: expense!['period'] == 1
+                  //                 ? Theme.of(context).colorScheme.onPrimary
+                  //                 : null,
+                  //           ),
+                  //           child: const Text('Daily'),
+                  //         ),
+                  //       ),
+                  //       SizedBox(width: 8),
+                  //       // weekly
+                  //       Expanded(
+                  //         child: ElevatedButton(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               expense!['period'] = 7;
+                  //             });
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             primary: expense!['period'] == 7
+                  //                 ? Theme.of(context).colorScheme.primary
+                  //                 : null,
+                  //             foregroundColor: expense!['period'] == 7
+                  //                 ? Theme.of(context).colorScheme.onPrimary
+                  //                 : null,
+                  //           ),
+                  //           child: const Text('Weekly'),
+                  //         ),
+                  //       ),
+                  //       // monthly
+                  //     ],
+                  //   ),
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(8),
+                  //   child: Row(
+                  //     children: [
+                  //       // monthly
+                  //       Expanded(
+                  //         child: ElevatedButton(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               expense!['period'] = 365 / 12;
+                  //             });
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             primary: expense!['period'] == 365 / 12
+                  //                 ? Theme.of(context).colorScheme.primary
+                  //                 : null,
+                  //             foregroundColor: expense!['period'] == 365 / 12
+                  //                 ? Theme.of(context).colorScheme.onPrimary
+                  //                 : null,
+                  //           ),
+                  //           child: const Text('Monthly'),
+                  //         ),
+                  //       ),
+                  //       SizedBox(width: 8),
+                  //       // yearly
+                  //       Expanded(
+                  //         child: ElevatedButton(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               expense!['period'] = 365;
+                  //             });
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             primary: expense!['period'] == 365
+                  //                 ? Theme.of(context).colorScheme.primary
+                  //                 : null,
+                  //             foregroundColor: expense!['period'] == 365
+                  //                 ? Theme.of(context).colorScheme.onPrimary
+                  //                 : null,
+                  //           ),
+                  //           child: const Text('Yearly'),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+
+                  // select period
                   Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
-                        // daily
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                expense!['period'] = 1;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: expense!['period'] == 1
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                              foregroundColor: expense!['period'] == 1
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : null,
-                            ),
-                            child: const Text('Daily'),
-                          ),
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropdownButton(
+                      items: [
+                        DropdownMenuItem(
+                          child: const Text('Daily'),
+                          value: 1,
                         ),
-                        SizedBox(width: 8),
-                        // weekly
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                expense!['period'] = 7;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: expense!['period'] == 7
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                              foregroundColor: expense!['period'] == 7
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : null,
-                            ),
-                            child: const Text('Weekly'),
-                          ),
+                        DropdownMenuItem(
+                          child: const Text('Weekly'),
+                          value: 7,
                         ),
-                        // monthly
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
-                        // monthly
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                expense!['period'] = 365 / 12;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: expense!['period'] == 365 / 12
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                              foregroundColor: expense!['period'] == 365 / 12
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : null,
-                            ),
-                            child: const Text('Monthly'),
-                          ),
+                        DropdownMenuItem(
+                          child: const Text('Bi-Weekly'),
+                          value: 14,
                         ),
-                        SizedBox(width: 8),
-                        // yearly
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                expense!['period'] = 365;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: expense!['period'] == 365
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                              foregroundColor: expense!['period'] == 365
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : null,
-                            ),
-                            child: const Text('Yearly'),
-                          ),
+                        DropdownMenuItem(
+                          child: const Text('Monthly'),
+                          value: 365 / 12,
+                        ),
+                        DropdownMenuItem(
+                          child: const Text('Yearly'),
+                          value: 365,
                         ),
                       ],
+                      onChanged: (value) {
+                        setState(() {
+                          expense!['period'] = value;
+                        });
+                      },
+                      value: expense!['period'],
+                      isExpanded: true,
+                      itemHeight: 60,
                     ),
                   ),
 
