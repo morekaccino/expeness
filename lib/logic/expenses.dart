@@ -3,8 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Expenses {
   final List<Map<String, dynamic>> expenses = [];
+  var defaultTotalPeriod = 1;
+  var defaultPeriodText = 'day';
+  final currency = '\$';
 
   Expenses(snapshot) {
+    if (snapshot != null) {
+      loadSnapshot(snapshot);
+    }
+  }
+
+  void loadSnapshot(snapshot) {
+    expenses.clear();
     for (var expense in snapshot.data!.docs ?? []) {
       final expenseId = expense.id;
       final expenseData = expense.data() as Map<String, dynamic>;
@@ -24,6 +34,10 @@ class Expenses {
     if (index != -1) {
       expenses.removeAt(index);
     }
+  }
+
+  void removeAllExpenses() {
+    expenses.clear();
   }
 
   void updateExpense(Map<String, dynamic> expense) {
@@ -67,6 +81,12 @@ class Expenses {
     return totalDaily * 7;
   }
 
+  double get defaultTotal {
+    return totalDaily * defaultTotalPeriod;
+  }
 
+  String get defaultPeriod {
+    return defaultPeriodText;
+  }
 
 }

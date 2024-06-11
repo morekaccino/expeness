@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expeness/logic/expenses.dart';
+import 'package:expeness/logic/helper.dart';
+import 'package:expeness/pages/total_cost.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -13,20 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _editMode = false;
   double _total = 0.0;
-  late Expenses expenses;
-
-  double _calculateTotalPerDay(List<Map<String, dynamic>> expenses) {
-    double total = 0.0;
-    for (var expense in expenses) {
-      var temp = expense['amount'] / expense['period'];
-      if (expense['tax'] != null && expense['tax']) {
-        temp *= expense['taxAmount'] / 100 + 1;
-      }
-      total += temp;
-    }
-    _total = total;
-    return total;
-  }
+  Expenses? expenses = Expenses(null);
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +42,9 @@ class _HomePageState extends State<HomePage> {
                         if (value != null)
                           {
                             setState(() {
-                              expenses
+                              expenses!
                                   .addExpense(value as Map<String, dynamic>);
-                              _total = expenses.totalDaily;
+                              _total = expenses!.defaultTotal;
                             })
                           }
                       });
@@ -103,11 +92,14 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.pushNamed(context, '/expense',
                                           arguments: <String, dynamic>{})
                                       .then((value) => {
-                                            if (value != null) {setState(() {})}
+                                            if (value != null)
+                                              {
+                                                expenses!.updateExpense(value
+                                                    as Map<String, dynamic>),
+                                                _total = expenses!.defaultTotal,
+                                                setState(() {})
+                                              }
                                           });
-                                  setState(() {
-                                    _editMode = false;
-                                  });
                                 },
                                 child: const Text('Add an expense'),
                               ),
@@ -115,8 +107,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                         );
                       }
-                      expenses = Expenses(snapshot);
-                      _total = expenses.totalDaily;
+                      expenses?.loadSnapshot(snapshot);
+                      _total = expenses!.defaultTotal;
                       return ListView.builder(
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -136,9 +128,9 @@ class _HomePageState extends State<HomePage> {
                                   .doc(expenseDict['id'])
                                   .delete()
                                   .then((value) => {
-                                        expenses
+                                        expenses!
                                             .removeExpense(expenseDict['id']),
-                                        _total = expenses.totalDaily,
+                                        _total = expenses!.defaultTotal,
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
@@ -186,20 +178,24 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             child: ListTile(
+                              visualDensity: VisualDensity(vertical: 3),
+                              // to expand
                               leading: CircleAvatar(
                                 backgroundColor: Colors.transparent,
                                 child: Text(
                                   (expenseDict['icon'] ?? ' ').toString(),
-                                  style: const TextStyle(fontSize: 27),
+                                  style: const TextStyle(fontSize: 28),
                                 ),
                               ),
                               title: expenseDict['title'] != null &&
                                       expenseDict['title'] != ''
-                                  ? Text(expenseDict['title'].toString())
+                                  ? Text(expenseDict['title'].toString(),
+                                      style: const TextStyle(fontSize: 20))
                                   : null,
                               subtitle: expenseDict['subtitle'] != null &&
                                       expenseDict['subtitle'] != ''
-                                  ? Text(expenseDict['subtitle'].toString())
+                                  ? Text(expenseDict['subtitle'].toString(),
+                                      style: const TextStyle(fontSize: 15))
                                   : null,
                               trailing: expenseDict['amount'] != null &&
                                       expenseDict['amount'] != ''
@@ -214,9 +210,9 @@ class _HomePageState extends State<HomePage> {
                                     .then((value) => {
                                           if (value != null)
                                             {
-                                              expenses.updateExpense(value
+                                              expenses!.updateExpense(value
                                                   as Map<String, dynamic>),
-                                              _total = expenses.totalDaily,
+                                              _total = expenses!.defaultTotal,
                                               setState(() {})
                                             }
                                         });
@@ -244,117 +240,59 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onPressed: () {
-                // open bottom sheet
+                // open bottom sheet, and read the value returned
                 showModalBottomSheet(
                   context: context,
                   enableDrag: true,
                   isScrollControlled: true,
                   builder: (context) {
-                    return Container(
-                      width: double.infinity,
-                      // enough height to show the content
-                      height: 700,
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Total Daily',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _total.toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          const Text(
-                            'Total Weekly',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            (expenses.totalWeekly).toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          const Text(
-                            'Total Bi-Weekly',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            (expenses.totalBiWeekly).toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          const Text(
-                            'Total Monthly',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            (expenses.totalMonthly).toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          const Text(
-                            'Total Yearly',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            (expenses.totalYearly).toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                        ],
-                      ),
-                    );
+                    return TotalCostPage(expenses: expenses!);
                   },
-                );
+                ).then((value) {
+                  if (value != null) {
+                    value = value as Expenses;
+                    expenses!.defaultPeriodText = value.defaultPeriodText;
+                    expenses!.defaultTotalPeriod = value.defaultTotalPeriod;
+                    _total = expenses!.defaultTotal;
+                    setState(() {});
+                  }
+                });
               },
-              child: Text(
-                _total.toStringAsFixed(2),
-                style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    '\$',
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w200,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    Helper.toCurrencyFormat(_total),
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    ' / ${expenses!.defaultPeriodText}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w200,
+                    ),
+                  ),
+                  Expanded(child: Container()),
+                  Transform.rotate(
+                    angle: -90 * 3.14159 / 180,
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 24,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
