@@ -109,120 +109,83 @@ class _HomePageState extends State<HomePage> {
                       }
                       expenses?.loadSnapshot(snapshot);
                       _total = expenses!.defaultTotal;
-                      return ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          Map<String, dynamic>? expenseDict =
-                              snapshot.data!.docs[index].data()
-                                  as Map<String, dynamic>;
-                          expenseDict['id'] = snapshot.data!.docs[index].id;
-
-                          return Dismissible(
-                            key: Key(expenseDict['id'].toString()),
-                            onDismissed: (direction) {
-                              // remove the expense from firestore
-                              FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(user.uid)
-                                  .collection('expenses')
-                                  .doc(expenseDict['id'])
-                                  .delete()
-                                  .then((value) => {
-                                        expenses!
-                                            .removeExpense(expenseDict['id']),
-                                        _total = expenses!.defaultTotal,
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            duration: Duration(seconds: 1),
-                                            content: SizedBox(
-                                              height: 40,
-                                              child: Center(
-                                                child: Text(
-                                                    '${expenseDict?['title']} dismissed',
-                                                    style: const TextStyle(
-                                                        fontSize: 20)),
-                                              ),
-                                            ),
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 8, right: 8),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.83,
+                            crossAxisSpacing: 8,
+                            // mainAxisSpacing: 8,
+                          ),
+                          itemCount: snapshot.data!.docs.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Map<String, dynamic>? expenseDict =
+                                snapshot.data!.docs[index].data()
+                                    as Map<String, dynamic>;
+                            expenseDict['id'] = snapshot.data!.docs[index].id;
+                            return Card(
+                              margin: const EdgeInsets.only(top: 8),
+                              clipBehavior: Clip.hardEdge,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  shape: const RoundedRectangleBorder(),
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/expense',
+                                          arguments: expenseDict)
+                                      .then((value) => {
+                                            if (value != null)
+                                              {
+                                                expenses!.updateExpense(value
+                                                    as Map<String, dynamic>),
+                                                _total = expenses!.defaultTotal,
+                                                setState(() {})
+                                              }
+                                          });
+                                },
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Center(
+                                        child: Hero(
+                                          tag: "${expenseDict['id']}-icon",
+                                          child: Text(
+                                            (expenseDict['icon'] ?? ' ')
+                                                .toString(),
+                                            style:
+                                                const TextStyle(fontSize: 100),
                                           ),
                                         ),
-                                      })
-                                  .then((value) => {setState(() {})});
-                            },
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              color: Theme.of(context).colorScheme.error,
-                              // Right
-                              child: const Align(
-                                alignment: Alignment.centerRight,
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.delete,
-                                        color: Colors.white,
                                       ),
-                                      SizedBox(width: 2),
-                                      // Text(
-                                      //   'Delete',
-                                      //   style: TextStyle(
-                                      //       color: Colors.white, fontSize: 20),
-                                      // ),
-                                    ],
-                                  ),
-                                ),
+                                      Text(
+                                        expenseDict['title'] != null &&
+                                                expenseDict['title'] != ''
+                                            ? expenseDict['title'].toString()
+                                            : '',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                        ),
+                                        overflow: TextOverflow.fade,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        expenseDict['amount'] != null &&
+                                                expenseDict['amount'] != ''
+                                            ? "\$${Helper.toCurrencyFormat(expenseDict['amount'])}"
+                                            : '',
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+                                    ]),
                               ),
-                            ),
-                            child: ListTile(
-                              visualDensity: VisualDensity(vertical: 1),
-                              // to expand
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                child: Hero(
-                                  tag: "${expenseDict['id']}-icon",
-                                  child: Text(
-                                    (expenseDict['icon'] ?? ' ').toString(),
-                                    style: const TextStyle(fontSize: 28),
-                                  ),
-                                ),
-                              ),
-                              title: expenseDict['title'] != null &&
-                                      expenseDict['title'] != ''
-                                  ? Text(expenseDict['title'].toString(),
-                                      style: const TextStyle(fontSize: 20))
-                                  : null,
-                              subtitle: expenseDict['subtitle'] != null &&
-                                      expenseDict['subtitle'] != ''
-                                  ? Text(expenseDict['subtitle'].toString(),
-                                      style: const TextStyle(fontSize: 15))
-                                  : null,
-                              trailing: expenseDict['amount'] != null &&
-                                      expenseDict['amount'] != ''
-                                  ? Text(
-                                      '\$${expenseDict["amount"].toString()}',
-                                      style: const TextStyle(fontSize: 15))
-                                  : null,
-                              // opne ExpensePage and pass the expense object
-                              onTap: () {
-                                Navigator.pushNamed(context, '/expense',
-                                        arguments: expenseDict)
-                                    .then((value) => {
-                                          if (value != null)
-                                            {
-                                              expenses!.updateExpense(value
-                                                  as Map<String, dynamic>),
-                                              _total = expenses!.defaultTotal,
-                                              setState(() {})
-                                            }
-                                        });
-                              },
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       );
                     }
                   }
