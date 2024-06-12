@@ -44,9 +44,20 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: ColorSchemeSeed,
       ),
       themeMode: ThemeMode.system,
-      routes: {
-        '': (context) => const HomePage(),
-        '/expense': (context) => const ExpensePage(),
+      // routes: {
+      //   '': (context) => const HomePage(),
+      //   '/expense': (context) => const ExpensePage(),
+      // },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/expense') {
+          return PageRouteBuilder(
+              settings: settings, // Pass this to make popUntil(), pushNamedAndRemoveUntil(), works
+              pageBuilder: (_, __, ___) => const ExpensePage(),
+              transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c)
+          );
+        }
+        // Unknown route
+        return MaterialPageRoute(builder: (_) => const HomePage());
       },
       home: const HomePage(),
     );

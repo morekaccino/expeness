@@ -4,6 +4,7 @@ import 'package:expeness/logic/helper.dart';
 import 'package:expeness/pages/total_cost.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:marquee_widget/marquee_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -70,6 +71,7 @@ class _HomePageState extends State<HomePage> {
                     .collection('users')
                     .doc(user!.uid)
                     .collection('expenses')
+                    .orderBy('amount', descending: true)
                     .get(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
@@ -113,18 +115,66 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.only(left: 8, right: 8),
                         child: GridView.builder(
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            // depends on the screen size
+                            crossAxisCount:
+                                MediaQuery.of(context).size.width ~/ 190,
                             childAspectRatio: 0.83,
                             crossAxisSpacing: 8,
-                            // mainAxisSpacing: 8,
                           ),
-                          itemCount: snapshot.data!.docs.length,
+                          itemCount: snapshot.data!.docs.length + 1,
                           itemBuilder: (BuildContext context, int index) {
+                            if (index == snapshot.data!.docs.length) {
+                              return Container(
+                                margin: const EdgeInsets.only(top: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                                    backgroundColor: Colors.transparent,
+                                    primary: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    // onPrimary: Theme.of(context).colorScheme.primary,
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/expense',
+                                            arguments: <String, dynamic>{})
+                                        .then((value) => {
+                                              if (value != null)
+                                                {
+                                                  expenses!.addExpense(value
+                                                      as Map<String, dynamic>),
+                                                  _total =
+                                                      expenses!.defaultTotal,
+                                                  setState(() {})
+                                                }
+                                            });
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: const [
+                                      Icon(Icons.add),
+                                      SizedBox(height: 8),
+                                      Text('Add an expense'),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
                             Map<String, dynamic>? expenseDict =
                                 snapshot.data!.docs[index].data()
                                     as Map<String, dynamic>;
                             expenseDict['id'] = snapshot.data!.docs[index].id;
+
                             return Card(
                               margin: const EdgeInsets.only(top: 8),
                               clipBehavior: Clip.hardEdge,
@@ -146,41 +196,73 @@ class _HomePageState extends State<HomePage> {
                                           });
                                 },
                                 child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Center(
-                                        child: Hero(
-                                          tag: "${expenseDict['id']}-icon",
-                                          child: Text(
-                                            (expenseDict['icon'] ?? ' ')
-                                                .toString(),
-                                            style:
-                                                const TextStyle(fontSize: 100),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Center(
+                                          child: Hero(
+                                            tag: "${expenseDict['id']}-icon",
+                                            child: Text(
+                                              (expenseDict['icon'] ?? ' ')
+                                                  .toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 100),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                      Text(
-                                        expenseDict['title'] != null &&
-                                                expenseDict['title'] != ''
-                                            ? expenseDict['title'].toString()
-                                            : '',
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                        ),
-                                        overflow: TextOverflow.fade,
-                                        maxLines: 1,
-                                        softWrap: false,
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        expenseDict['amount'] != null &&
-                                                expenseDict['amount'] != ''
-                                            ? "\$${Helper.toCurrencyFormat(expenseDict['amount'])}"
-                                            : '',
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
+                                      Expanded(
+                                          flex: 2,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8, top: 8),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Marquee(
+                                                  animationDuration:
+                                                      Duration(seconds: 2),
+                                                  backDuration:
+                                                      Duration(seconds: 1),
+                                                  pauseDuration:
+                                                      Duration(seconds: 1),
+                                                  child: Text(
+                                                    expenseDict['title'] !=
+                                                                null &&
+                                                            expenseDict[
+                                                                    'title'] !=
+                                                                ''
+                                                        ? expenseDict['title']
+                                                            .toString()
+                                                        : '',
+                                                    style: const TextStyle(
+                                                      fontSize: 20,
+                                                    ),
+                                                    overflow: TextOverflow.fade,
+                                                    maxLines: 1,
+                                                    softWrap: false,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  expenseDict['amount'] !=
+                                                              null &&
+                                                          expenseDict[
+                                                                  'amount'] !=
+                                                              ''
+                                                      ? "\$${Helper.toCurrencyFormat(expenseDict['amount'])}"
+                                                      : '',
+                                                  style: const TextStyle(
+                                                      fontSize: 15),
+                                                ),
+                                              ],
+                                            ),
+                                          ))
                                     ]),
                               ),
                             );

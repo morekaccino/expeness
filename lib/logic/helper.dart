@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Helper {
   static String toCurrencyFormat(double value) {
     // 2 decimal places and ',' for thousands
@@ -13,5 +15,14 @@ class Helper {
       result = whole[whole.length - 1 - i] + result;
     }
     return '$result.$decimal';
+  }
+
+  static Route createRoute(page, params) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page(params),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return child;
+      },
+    );
   }
 }
